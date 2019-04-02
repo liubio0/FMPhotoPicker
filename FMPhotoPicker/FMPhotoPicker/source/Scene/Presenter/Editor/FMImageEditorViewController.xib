@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -16,8 +16,10 @@
                 <outlet property="bottomMenuContainer" destination="qBv-7F-gKy" id="1tV-1O-a2P"/>
                 <outlet property="cancelButton" destination="Oky-8O-GsR" id="XaC-ee-Ou0"/>
                 <outlet property="cropMenuButton" destination="UbG-RA-D49" id="2JF-0j-xJ7"/>
+                <outlet property="cropMenuContainerWidth" destination="OU6-Co-5sY" id="Nn3-aH-PjQ"/>
                 <outlet property="doneButton" destination="l4B-6K-1aJ" id="GnP-JE-dyb"/>
                 <outlet property="filterMenuButton" destination="iga-x3-Nbo" id="Ip3-dv-26C"/>
+                <outlet property="filterMenuContainerWidth" destination="fr3-0Q-YXt" id="afJ-Vk-F8z"/>
                 <outlet property="subMenuContainer" destination="zaG-6j-m4a" id="TQ4-6L-50g"/>
                 <outlet property="topMenuContainter" destination="zK2-M3-1gG" id="EDK-Wb-kUJ"/>
                 <outlet property="topMenuTopConstraint" destination="nrk-UD-TWk" id="HLi-5J-ZoW"/>
@@ -110,7 +112,7 @@
                             <rect key="frame" x="187.5" y="0.0" width="187.5" height="40"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" semanticContentAttribute="forceLeftToRight" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UbG-RA-D49">
-                                    <rect key="frame" x="62" y="8.5" width="64" height="24"/>
+                                    <rect key="frame" x="62" y="8" width="64" height="24"/>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                     <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
                                     <state key="normal" title="Crop" image="icon_crop">
@@ -128,10 +130,10 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Fl8-Qt-5hu">
-                            <rect key="frame" x="0.0" y="0.0" width="187.5" height="40"/>
+                            <rect key="frame" x="0.0" y="0.0" width="237.5" height="40"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" semanticContentAttribute="forceLeftToRight" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iga-x3-Nbo">
-                                    <rect key="frame" x="60.5" y="8.5" width="67" height="24"/>
+                                    <rect key="frame" x="85.5" y="8" width="67" height="24"/>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                     <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
                                     <state key="normal" title="Filter" image="icon_filter">
@@ -155,14 +157,14 @@
                         <constraint firstAttribute="bottom" secondItem="7JO-AQ-ps5" secondAttribute="bottom" id="62a-yI-eGV"/>
                         <constraint firstItem="Fl8-Qt-5hu" firstAttribute="leading" secondItem="qBv-7F-gKy" secondAttribute="leading" id="7aK-s9-p2M"/>
                         <constraint firstItem="jhN-0Z-cb1" firstAttribute="top" secondItem="qBv-7F-gKy" secondAttribute="top" id="Mtf-r0-Qtt"/>
-                        <constraint firstItem="7JO-AQ-ps5" firstAttribute="leading" secondItem="Fl8-Qt-5hu" secondAttribute="trailing" id="QBf-ca-8HN"/>
+                        <constraint firstItem="7JO-AQ-ps5" firstAttribute="width" secondItem="qBv-7F-gKy" secondAttribute="width" multiplier="0.5" id="OU6-Co-5sY"/>
                         <constraint firstAttribute="bottom" secondItem="jhN-0Z-cb1" secondAttribute="bottom" id="Tyh-l9-rsd"/>
                         <constraint firstAttribute="height" constant="40" id="VD7-YQ-tPw"/>
                         <constraint firstItem="Fl8-Qt-5hu" firstAttribute="top" secondItem="qBv-7F-gKy" secondAttribute="top" id="c9C-EK-ed4"/>
+                        <constraint firstItem="Fl8-Qt-5hu" firstAttribute="width" secondItem="qBv-7F-gKy" secondAttribute="width" multiplier="0.5" constant="50" id="fr3-0Q-YXt"/>
                         <constraint firstItem="7JO-AQ-ps5" firstAttribute="top" secondItem="qBv-7F-gKy" secondAttribute="top" id="gJW-vl-Fia"/>
                         <constraint firstAttribute="bottom" secondItem="Fl8-Qt-5hu" secondAttribute="bottom" id="hOq-5Z-WRR"/>
                         <constraint firstAttribute="trailing" secondItem="7JO-AQ-ps5" secondAttribute="trailing" id="pjZ-L4-urp"/>
-                        <constraint firstItem="7JO-AQ-ps5" firstAttribute="width" secondItem="Fl8-Qt-5hu" secondAttribute="width" id="r92-Bb-C0P"/>
                         <constraint firstAttribute="trailing" secondItem="jhN-0Z-cb1" secondAttribute="trailing" id="vPd-eU-oqI"/>
                     </constraints>
                 </view>

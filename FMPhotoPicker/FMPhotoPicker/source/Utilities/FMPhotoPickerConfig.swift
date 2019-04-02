@@ -14,6 +14,13 @@ public enum FMSelectMode {
     case single
 }
 
+public enum FMEditType {
+    case both
+    case filter
+    case crop
+    case none
+}
+
 public enum FMMediaType {
     case image
     case video
@@ -45,6 +52,7 @@ public enum FMMediaType {
 public struct FMPhotoPickerConfig {
     public var mediaTypes: [FMMediaType] = [.image]
     public var selectMode: FMSelectMode = .multiple
+    public var editType: FMEditType = .both
     public var maxImage: Int = 10
     public var maxVideo: Int = 10
     public var availableFilters: [FMFilterable] = kDefaultAvailableFilters

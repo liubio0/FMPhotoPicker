@@ -49,12 +49,14 @@ class FMPresenterBottomView: UIView {
             self.playbackControlView.playerProgressDidChange(value: percent)
         }
         
-        self.addSubview(editMenuView)
-        editMenuView.translatesAutoresizingMaskIntoConstraints = false
-        editMenuView.heightAnchor.constraint(equalToConstant: 46).isActive = true
-        editMenuView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        editMenuView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        editMenuView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        if config.editType != .none {
+            self.addSubview(editMenuView)
+            editMenuView.translatesAutoresizingMaskIntoConstraints = false
+            editMenuView.heightAnchor.constraint(equalToConstant: 46).isActive = true
+            editMenuView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
+            editMenuView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+            editMenuView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        }
     }
     
     public func resetPlaybackControl(cgImages: [CGImage], duration: TimeInterval) {

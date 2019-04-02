@@ -24,8 +24,10 @@ public class FMImageEditorViewController: UIViewController {
     @IBOutlet weak var bottomMenuContainer: UIView!
     @IBOutlet weak var subMenuContainer: UIView!
     
+    @IBOutlet weak var filterMenuContainerWidth: NSLayoutConstraint!
     @IBOutlet weak var filterMenuButton: UIButton!
     
+    @IBOutlet weak var cropMenuContainerWidth: NSLayoutConstraint!
     @IBOutlet weak var cropMenuButton: UIButton!
     @IBOutlet weak var cancelButton: UIButton!
     @IBOutlet weak var doneButton: UIButton!
@@ -175,13 +177,28 @@ public class FMImageEditorViewController: UIViewController {
             let cropTintIcon = self.cropMenuButton.imageView?.image?.withRenderingMode(.alwaysTemplate)
             self.cropMenuButton.setImage(cropTintIcon, for: .normal)
             
-            // default color
-            self.filterMenuButton.setTitleColor(kRedColor, for: .normal)
-            self.filterMenuButton.tintColor = kRedColor
-            
-            self.cropMenuButton.setTitleColor(kBlackColor, for: .normal)
-            self.cropMenuButton.tintColor = kBlackColor
-            
+            // editType and default color
+            switch self.config.editType {
+            case .both, .none:
+                self.filterMenuButton.setTitleColor(kRedColor, for: .normal)
+                self.filterMenuButton.tintColor = kRedColor
+                
+                self.cropMenuButton.setTitleColor(kBlackColor, for: .normal)
+                self.cropMenuButton.tintColor = kBlackColor
+            case .filter:
+                self.filterMenuContainerWidth.constant = UIScreen.main.bounds.width / 2
+                self.cropMenuButton.isHidden = true
+                self.filterMenuButton.isEnabled = false
+                self.filterMenuButton.setTitleColor(kRedColor, for: .normal)
+                self.filterMenuButton.tintColor = kRedColor
+            case .crop:
+                self.cropMenuContainerWidth.constant = UIScreen.main.bounds.width / 2
+                self.filterMenuButton.isHidden = true
+                self.cropMenuButton.isEnabled = false
+                self.cropMenuButton.setTitleColor(kRedColor, for: .normal)
+                self.cropMenuButton.tintColor = kRedColor
+            }
+
             // get full size original image without any crop or filter applied
             self.fmPhotoAsset.requestFullSizePhoto(cropState: .original, filterState: .original) { [weak self] image in
                 guard let strongSelf = self,
@@ -235,7 +252,12 @@ public class FMImageEditorViewController: UIViewController {
         showAnimatedMenu()
         
         // show filter menu by default
-        showAnimatedFilterMenu()
+        switch self.config.editType {
+        case .filter,.both, .none:
+            showAnimatedFilterMenu()
+        case .crop:
+            showAnimatedCropMenu()
+        }
         
         // restore crop image location from previous edditting session
         cropView.contentFrame = contentFrameFullScreen()
