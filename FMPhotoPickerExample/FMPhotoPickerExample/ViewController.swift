@@ -83,7 +83,7 @@ class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMI
         
         var config = FMPhotoPickerConfig()
         
-        config.editType = .none
+        config.editType = .crop
         config.selectMode = selectMode
         config.mediaTypes = mediaTypes
         config.maxImage = self.maxImage

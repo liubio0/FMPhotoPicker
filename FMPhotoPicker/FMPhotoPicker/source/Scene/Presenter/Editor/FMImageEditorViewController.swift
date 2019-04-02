@@ -251,29 +251,33 @@ public class FMImageEditorViewController: UIViewController {
         
         showAnimatedMenu()
         
-        // show filter menu by default
-        switch self.config.editType {
-        case .filter,.both, .none:
-            showAnimatedFilterMenu()
-        case .crop:
-            showAnimatedCropMenu()
-        }
-        
         // restore crop image location from previous edditting session
         cropView.contentFrame = contentFrameFullScreen()
         cropView.restoreFromPreviousEdittingSection()
         
-        // move image to center of contentFrame
-        cropView.contentFrame = contentFrameFilter()
-        cropView.moveCropBoxToAspectFillContentFrame()
+        // show filter menu by default
+        switch self.config.editType {
+        case .filter,.both, .none:
+            showAnimatedFilterMenu()
+            // move image to center of contentFrame
+            cropView.contentFrame = contentFrameFilter()
+            cropView.moveCropBoxToAspectFillContentFrame()
+            cropView.isCropping = false
+            cropView.foregroundView.isEnabledTouches = true
+        case .crop:
+            showAnimatedCropMenu()
+            // move image to center of contentFrame
+            cropView.contentFrame = contentFrameCrop()
+            cropView.moveCropBoxToAspectFillContentFrame()
+            cropView.isCropping = true
+            cropView.foregroundView.isEnabledTouches = false
+        }
         
         // show view the crop view image is re-located
         if !isAnimatedPresent {
             view.isHidden = false
         }
         
-        // dissable pan and pinch gestures
-        cropView.isCropping = false
     }
     
     override public func viewDidLayoutSubviews() {
