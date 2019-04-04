@@ -147,9 +147,9 @@ public class FMPhotoPickerViewController: UIViewController {
             for (index, element) in self.dataSource.getSelectedPhotos().enumerated() {
                 multiTask.enter()
                 element.requestFullSizePhoto(cropState: .edited, filterState: .edited) {
+                    multiTask.leave()
                     guard let image = $0 else { return }
                     dict[index] = image
-                    multiTask.leave()
                 }
             }
             multiTask.wait()
