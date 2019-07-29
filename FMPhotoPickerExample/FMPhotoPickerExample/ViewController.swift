@@ -16,6 +16,7 @@ class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMI
     }
     
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage]) {
+        previewImageView.image = photos.first
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -83,7 +84,7 @@ class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMI
         
         var config = FMPhotoPickerConfig()
         
-        config.editType = .crop
+        //config.editType = .crop
         config.selectMode = selectMode
         config.mediaTypes = mediaTypes
         config.maxImage = self.maxImage
