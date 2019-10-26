@@ -212,9 +212,12 @@ class FMPhotoPresenterViewController: UIViewController {
         // Update selection status
         if let selectedIndex = self.dataSource.selectedIndexOfPhoto(atIndex: self.currentPhotoIndex) {
             if self.config.selectMode == .multiple {
-                self.selectedIndex.isHidden = false
-                self.selectedIndex.text = "\(selectedIndex + 1)"
-                self.selectedIcon.image = UIImage(named: "check_on", in: Bundle(for: self.classForCoder), compatibleWith: nil)
+//                self.selectedIndex.isHidden = false
+//                self.selectedIndex.text = "\(selectedIndex + 1)"
+//                self.selectedIcon.image = UIImage(named: "check_on", in: Bundle(for: self.classForCoder), compatibleWith: nil)
+                //统一使用单选框
+                self.selectedIndex.isHidden = true
+                self.selectedIcon.image = UIImage(named: "single_check_on", in: Bundle(for: self.classForCoder), compatibleWith: nil)
             } else {
                 self.selectedIndex.isHidden = true
                 self.selectedIcon.image = UIImage(named: "single_check_on", in: Bundle(for: self.classForCoder), compatibleWith: nil)
