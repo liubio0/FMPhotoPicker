@@ -10,6 +10,10 @@ import UIKit
 
 extension UIView {
     func snapshot() -> UIView {
+        if layer.contents == nil {
+            layer.setNeedsDisplay()
+            layer.displayIfNeeded()
+        }
         if let contents = layer.contents {
             var snapshotedView: UIView!
             
