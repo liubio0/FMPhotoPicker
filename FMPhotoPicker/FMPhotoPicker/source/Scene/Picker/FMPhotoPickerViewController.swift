@@ -12,6 +12,7 @@ import Photos
 // MARK: - Delegate protocol
 public protocol FMPhotoPickerViewControllerDelegate: class {
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage])
+    func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage)
 }
 
 public class FMPhotoPickerViewController: UIViewController {
@@ -189,11 +190,24 @@ extension FMPhotoPickerViewController: UICollectionViewDataSource {
                 self.reloadAffectedCellByChangingSelection(changedIndex: selectedIndex)
             } else {
                 self.tryToAddPhotoToSelectedList(photoIndex: indexPath.item)
+                self.selectPhotoHandle(at: indexPath.item)
             }
             self.updateControlBar()
         }
         
         return cell
+    }
+    
+    private func selectPhotoHandle(at index: Int) {
+        //选中照片
+        let selectedPhoto = self.dataSource.photo(atIndex: index)
+        selectedPhoto?.requestFullSizePhoto(cropState: .edited, filterState: .edited) {
+            if let image = $0 {
+                DispatchQueue.main.async {
+                    self.delegate?.fmPhotoPickerController(self, didFinishSelectingPhotoWith: image)
+                }
+            }
+        }
     }
     
     /**
@@ -268,6 +282,7 @@ extension FMPhotoPickerViewController: UICollectionViewDelegate {
         
         vc.didSelectPhotoHandler = { photoIndex in
             self.tryToAddPhotoToSelectedList(photoIndex: photoIndex)
+            self.selectPhotoHandle(at: photoIndex)
         }
         vc.didDeselectPhotoHandler = { photoIndex in
             if let selectedIndex = self.dataSource.selectedIndexOfPhoto(atIndex: photoIndex) {
