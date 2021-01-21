@@ -11,6 +11,7 @@ import FMPhotoPicker
 import CommonCrypto
 
 class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMImageEditorViewControllerDelegate {
+    
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage) {
         previewImageView.image = photo
         print(photo.MD5)
@@ -25,6 +26,14 @@ class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMI
         previewImageView.image = photos.first
         print(photos.first?.MD5)
         self.dismiss(animated: true, completion: nil)
+    }
+    
+    func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage], fileNames: [String?]) {
+        print(fileNames)
+    }
+    
+    func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage, fileName: String?) {
+        print(fileName)
     }
     
     @IBOutlet weak var selectMode: UISegmentedControl!

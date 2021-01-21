@@ -13,6 +13,13 @@ import Photos
 public protocol FMPhotoPickerViewControllerDelegate: class {
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage])
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage)
+    func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage], fileNames: [String?])
+    func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage, fileName: String?)
+}
+
+public extension FMPhotoPickerViewControllerDelegate {
+    func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage], fileNames: [String?]) {}
+    func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage, fileName: String?) {}
 }
 
 public class FMPhotoPickerViewController: UIViewController {
@@ -142,7 +149,7 @@ public class FMPhotoPickerViewController: UIViewController {
         FMLoadingView.shared.show()
         
         var dict = [Int:UIImage]()
-        
+        var fileNameDict = [Int:String]()
         DispatchQueue.global(qos: .userInitiated).async {
             let multiTask = DispatchGroup()
             for (index, element) in self.dataSource.getSelectedPhotos().enumerated() {
@@ -151,15 +158,20 @@ public class FMPhotoPickerViewController: UIViewController {
                     if let image = $0 {
                         dict[index] = image
                     }
+                    if let fileName = element.fileName {
+                        fileNameDict[index] = fileName
+                    }
                     multiTask.leave()
                 }
             }
             multiTask.wait()
             
             let result = dict.sorted(by: { $0.key < $1.key }).map { $0.value }
+            let fileNames = fileNameDict.sorted(by: { $0.key < $1.key }).map { $0.value }
             DispatchQueue.main.async {
                 FMLoadingView.shared.hide()
                 self.delegate?.fmPhotoPickerController(self, didFinishPickingPhotoWith: result)
+                self.delegate?.fmPhotoPickerController(self, didFinishPickingPhotoWith: result, fileNames: fileNames)
             }
         }
     }
@@ -205,6 +217,7 @@ extension FMPhotoPickerViewController: UICollectionViewDataSource {
             if let image = $0 {
                 DispatchQueue.main.async {
                     self.delegate?.fmPhotoPickerController(self, didFinishSelectingPhotoWith: image)
+                    self.delegate?.fmPhotoPickerController(self, didFinishSelectingPhotoWith: image, fileName: selectedPhoto?.fileName)
                 }
             }
         }

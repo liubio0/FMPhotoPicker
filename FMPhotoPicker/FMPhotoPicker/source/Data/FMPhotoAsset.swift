@@ -29,6 +29,9 @@ public class FMPhotoAsset {
     
     private var fullSizePhotoRequestId: PHImageRequestID?
     private var editor: FMImageEditor!
+    var fileName: String? {
+        return asset?.value(forKey: "filename") as? String
+    }
     /**
      Indicates whether the request for the full size image was canceled.
      A workaround for this issue:
