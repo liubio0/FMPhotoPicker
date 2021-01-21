@@ -61,6 +61,8 @@ public struct FMPhotoPickerConfig {
     
     public var forceCropEnabled = false
     public var eclipsePreviewEnabled = false
+    //多选的时候是否允许批量选择
+    public var allowBatchSelect: Bool = true
     
     public var titleFontSize: CGFloat = 17
     

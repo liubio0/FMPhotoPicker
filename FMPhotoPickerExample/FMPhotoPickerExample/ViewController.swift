@@ -8,10 +8,12 @@
 
 import UIKit
 import FMPhotoPicker
+import CommonCrypto
 
 class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMImageEditorViewControllerDelegate {
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage) {
         previewImageView.image = photo
+        print(photo.MD5)
     }
     
     func fmImageEditorViewController(_ editor: FMImageEditorViewController, didFinishEdittingPhotoWith photo: UIImage) {
@@ -21,6 +23,7 @@ class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMI
     
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage]) {
         previewImageView.image = photos.first
+        print(photos.first?.MD5)
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -107,6 +110,7 @@ class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMI
         
         // all available filters will be used
         config.availableFilters = []
+        config.allowBatchSelect = false
         
         return config
     }
@@ -125,3 +129,21 @@ class ViewController: UIViewController, FMPhotoPickerViewControllerDelegate, FMI
     }
 }
 
+extension UIImage {
+    var MD5: String {
+        guard let imageData = self.jpegData(compressionQuality: 1) else { return "" }
+        let input = NSData(data: imageData)
+        let digestLen = Int(CC_MD5_DIGEST_LENGTH)
+        let result = UnsafeMutablePointer<CUnsignedChar>.allocate(capacity: digestLen)
+
+        CC_MD5(input.bytes, CC_LONG(input.length), result)
+        
+        let hash = NSMutableString()
+        for i in 0 ..< digestLen {
+            hash.appendFormat("%02x", result[i])
+        }
+        result.deinitialize(count: digestLen)
+        result.deallocate()
+        return String(format: hash as String)
+    }
+}

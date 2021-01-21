@@ -42,7 +42,7 @@ public class FMPhotoPickerViewController: UIViewController {
     
     private var dataSource: FMPhotosDataSource! {
         didSet {
-            if self.config.selectMode == .multiple {
+            if self.config.selectMode == .multiple && self.config.allowBatchSelect {
                 // Enable batchSelector in multiple selection mode only
                 self.batchSelector.enable()
             }
