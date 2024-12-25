@@ -179,7 +179,10 @@ public class FMImageEditorViewController: UIViewController {
             
             // editType and default color
             switch self.config.editType {
-            case .both, .none:
+            case .none:
+                self.cropMenuButton.isHidden = true
+                self.filterMenuButton.isEnabled = true
+            case .both:
                 self.filterMenuButton.setTitleColor(kRedColor, for: .normal)
                 self.filterMenuButton.tintColor = kRedColor
                 
