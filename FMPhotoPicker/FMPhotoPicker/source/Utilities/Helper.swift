@@ -157,6 +157,46 @@ class Helper: NSObject {
         return photoAssets
     }
     
+    static func getAssetsAndAlbum(allowMediaTypes: [FMMediaType]) -> (photoAssets: [PHAsset],photoAlbums: [AlbumCollection]) {
+            let fetchOptions = PHFetchOptions()
+
+            fetchOptions.predicate = NSPredicate(format: "mediaType IN %@", allowMediaTypes.map( { $0.value() }))
+            
+            let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
+            
+            var assets = [PHAsset]()
+            var albumCollections: [AlbumCollection] = [AlbumCollection]()
+            guard fetchResult.count > 0 else { return (photoAssets: assets, photoAlbums: albumCollections) }
+
+            let userCollections: PHFetchResult<PHCollection> = PHCollectionList.fetchTopLevelUserCollections(with: nil)
+            for i in 0 ..< userCollections.count {
+                let albumCollection: AlbumCollection = AlbumCollection()
+                let collection: PHCollection = userCollections[i]
+                print("user相册标题---%@", collection.localizedTitle as Any)
+                if collection is PHAssetCollection {
+                    let assetCollection = collection as! PHAssetCollection
+                    let fetchResult: PHFetchResult = PHAsset.fetchAssets(in: assetCollection, options: fetchOptions)
+                    if fetchResult.count > 0 {
+                        albumCollection.count = fetchResult.count
+                        albumCollection.name = "\(collection.localizedTitle ?? "")"
+                        fetchResult.enumerateObjects() { asset, index, _ in
+                            albumCollection.photoAssets.append(asset)
+                        }
+                        albumCollections.append(albumCollection)
+                    }
+                }
+            }
+                    
+            fetchResult.enumerateObjects() { asset, index, _ in
+                assets.append(asset)
+            }
+            
+            return (photoAssets: assets,photoAlbums: albumCollections)
+        }
+        
+        
+
+    
     static func canAccessPhotoLib() -> Bool {
         return PHPhotoLibrary.authorizationStatus() == .authorized
     }
