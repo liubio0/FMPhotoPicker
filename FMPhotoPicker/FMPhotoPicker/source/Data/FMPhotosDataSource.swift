@@ -9,12 +9,22 @@
 import Foundation
 import Photos
 
+class AlbumCollection {
+    var name: String? = nil
+    var photoAssets: [PHAsset] = []
+    var count: Int = 0
+}
+
 class FMPhotosDataSource {
     public private(set) var photoAssets: [FMPhotoAsset]
     private var selectedPhotoIndexes: [Int]
     
-    init(photoAssets: [FMPhotoAsset]) {
+    public private(set) var photoAlbums: [AlbumCollection] = []
+        
+    init(photoAssets: [FMPhotoAsset], photoAlbums: [AlbumCollection]) {
+
         self.photoAssets = photoAssets
+        self.photoAlbums = photoAlbums
         self.selectedPhotoIndexes = []
     }
     
