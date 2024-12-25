@@ -15,11 +15,17 @@ public protocol FMPhotoPickerViewControllerDelegate: class {
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage)
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage], fileNames: [String?])
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage, fileName: String?)
+    func fmAllPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage], fileNames: [String?], fileDirectorys: [String?], fileCreationDates: [String?])
 }
 
 public extension FMPhotoPickerViewControllerDelegate {
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage], fileNames: [String?]) {}
     func fmPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishSelectingPhotoWith photo: UIImage, fileName: String?) {}
+    func fmAllPhotoPickerController(_ picker: FMPhotoPickerViewController, didFinishPickingPhotoWith photos: [UIImage], fileNames: [String?], fileDirectorys: [String?], fileCreationDates: [String?]) {}
+}
+
+public protocol FMPhotoPickerSheetDelegate: class {
+    func showSheet(titles:[String], callback: @escaping (_ results: Int) -> Void)
 }
 
 public class FMPhotoPickerViewController: UIViewController {
@@ -30,9 +36,15 @@ public class FMPhotoPickerViewController: UIViewController {
     @IBOutlet weak var determineButton: UIButton!
     @IBOutlet weak var cancelButton: UIButton!
     
+    private lazy var selectAlbumButton: UIButton = {
+        let temp = UIButton()
+        temp.addTarget(self, action: #selector(openSelectAlbumActionSheet), for: .touchUpInside)
+        return temp
+    }()
+    
     // MARK: - Public
     public weak var delegate: FMPhotoPickerViewControllerDelegate? = nil
-    
+    public weak var sheetDelegate: FMPhotoPickerSheetDelegate?
     // MARK: - Private
     
     // Index of photo that is currently displayed in PhotoPresenterViewController.
@@ -90,12 +102,20 @@ public class FMPhotoPickerViewController: UIViewController {
         self.numberOfSelectedPhotoContainer.layer.cornerRadius = self.numberOfSelectedPhotoContainer.frame.size.width / 2
         self.numberOfSelectedPhotoContainer.isHidden = true
         self.determineButton.isHidden = true
+        self.selectAlbumButton.isHidden = true
+
         
         // set button title
         self.cancelButton.setTitle(config.strings["picker_button_cancel"], for: .normal)
         self.cancelButton.titleLabel!.font = UIFont.systemFont(ofSize: config.titleFontSize)
         self.determineButton.setTitle(config.strings["picker_button_select_done"], for: .normal)
         self.determineButton.titleLabel!.font = UIFont.systemFont(ofSize: config.titleFontSize)
+        self.selectAlbumButton.titleLabel!.font = UIFont.systemFont(ofSize: config.titleFontSize)
+        self.selectAlbumButton.setTitleColor(UIColor.black, for: .normal)
+        self.selectAlbumButton.addTarget(self, action: #selector(openSelectAlbumActionSheet), for: .touchUpInside)
+        self.view.addSubview(selectAlbumButton)
+        selectAlbumButton.frame = CGRect(x: 400 / 2 - 60, y: 20, width: 120, height: 36)
+
     }
     
     // MARK: - Target Actions
@@ -118,11 +138,41 @@ public class FMPhotoPickerViewController: UIViewController {
         }
     }
     
+    private func fetchPhotosWithAlbum(photoAssets: [PHAsset]) {
+            let photoNoCloudAssets = photoAssets.filter { (model) -> Bool in
+                return model.sourceType != PHAssetSourceType.typeCloudShared
+            }
+            let forceCropType = config.forceCropEnabled ? config.availableCrops.first! : nil
+            let fmPhotoAssets = photoNoCloudAssets.map { FMPhotoAsset(asset: $0, forceCropType: forceCropType) }
+            self.dataSource = FMPhotosDataSource(photoAssets: fmPhotoAssets, photoAlbums: self.dataSource.photoAlbums)
+            
+            if self.dataSource.numberOfPhotos > 0 {
+                self.imageCollectionView.reloadData()
+                self.imageCollectionView.selectItem(at: IndexPath(row: self.dataSource.numberOfPhotos - 1, section: 0),
+                                                    animated: false,
+                                                    scrollPosition: .bottom)
+            }
+        }
+
+
+    
     private func fetchPhotos() {
-        let photoAssets = Helper.getAssets(allowMediaTypes: self.config.mediaTypes)
+        //旧接口Helper.getAssets获取全部图片
+        //新接口getAssetsAndAlbum除了获取全部图片外，根据用户相册返回分相册的图片，用户用户筛选自定义的相册图片。2022.08
+        let result = Helper.getAssetsAndAlbum(allowMediaTypes: self.config.mediaTypes)
+        let photoAssets = result.photoAssets
+        let photoAlbums = result.photoAlbums //相册（除所有照片外）
+        
+        let photoNoCloudAssets = photoAssets.filter { (model) -> Bool in
+            return model.sourceType != PHAssetSourceType.typeCloudShared
+        }
         let forceCropType = config.forceCropEnabled ? config.availableCrops.first! : nil
-        let fmPhotoAssets = photoAssets.map { FMPhotoAsset(asset: $0, forceCropType: forceCropType) }
-        self.dataSource = FMPhotosDataSource(photoAssets: fmPhotoAssets)
+        let fmPhotoAssets = photoNoCloudAssets.map { FMPhotoAsset(asset: $0, forceCropType: forceCropType) }
+        self.dataSource = FMPhotosDataSource(photoAssets: fmPhotoAssets, photoAlbums: photoAlbums)
+        if self.dataSource.photoAlbums.count > 0 {
+            self.selectAlbumButton.isHidden = false
+            self.selectAlbumButton.setTitle("所有照片∨", for: .normal)
+        }
         
         if self.dataSource.numberOfPhotos > 0 {
             self.imageCollectionView.reloadData()
@@ -150,6 +200,8 @@ public class FMPhotoPickerViewController: UIViewController {
         
         var dict = [Int:UIImage]()
         var fileNameDict = [Int:String]()
+        var fileDirectoryDict = [Int:String]()
+        var fileCreationDateDict = [Int:String]()
         DispatchQueue.global(qos: .userInitiated).async {
             let multiTask = DispatchGroup()
             for (index, element) in self.dataSource.getSelectedPhotos().enumerated() {
@@ -161,6 +213,16 @@ public class FMPhotoPickerViewController: UIViewController {
                     if let fileName = element.fileName {
                         fileNameDict[index] = fileName
                     }
+                    if let fileDirectory = element.asset?.value(forKey: "directory") as? String {
+                        fileDirectoryDict[index] = fileDirectory
+                    }
+                    if let fileCreationDate = element.asset?.creationDate {
+                        let dateFormatter=DateFormatter()
+                        dateFormatter.dateFormat="yyyyMMddHHmmss"
+                        let dateStr = dateFormatter.string(from: fileCreationDate)
+                        fileCreationDateDict[index] = dateStr
+                    }
+                    
                     multiTask.leave()
                 }
             }
@@ -168,13 +230,52 @@ public class FMPhotoPickerViewController: UIViewController {
             
             let result = dict.sorted(by: { $0.key < $1.key }).map { $0.value }
             let fileNames = fileNameDict.sorted(by: { $0.key < $1.key }).map { $0.value }
+            let fileDirectorys = fileDirectoryDict.sorted(by: { $0.key < $1.key }).map { $0.value }
+            let fileCreationDates = fileCreationDateDict.sorted(by: { $0.key < $1.key }).map { $0.value }
             DispatchQueue.main.async {
                 FMLoadingView.shared.hide()
                 self.delegate?.fmPhotoPickerController(self, didFinishPickingPhotoWith: result)
                 self.delegate?.fmPhotoPickerController(self, didFinishPickingPhotoWith: result, fileNames: fileNames)
+                self.delegate?.fmAllPhotoPickerController(self, didFinishPickingPhotoWith: result, fileNames: fileNames, fileDirectorys: fileDirectorys, fileCreationDates: fileCreationDates)
             }
         }
     }
+    
+    @objc func openSelectAlbumActionSheet() {
+        if self.dataSource.photoAlbums.count <= 0 { return }
+        var titleArray: [String] = []
+        for i in 0 ..< self.dataSource.photoAlbums.count {
+            titleArray.append("\(self.dataSource.photoAlbums[i].name ?? "")(\(self.dataSource.photoAlbums[i].count))")
+        }
+        self.sheetDelegate?.showSheet(titles: titleArray, callback: {[weak self] (index) in
+            for i in 0 ..< self!.dataSource.photoAlbums.count {
+                if index == i+1 {
+                    print("选择了 \(self!.dataSource.photoAlbums[i].name ?? "")")
+                    self?.numberOfSelectedPhotoContainer.isHidden = true
+                    self?.selectAlbumButton.setTitle("\(self!.dataSource.photoAlbums[i].name ?? "")∨", for: .normal)
+                    self?.fetchPhotosWithAlbum(photoAssets: self!.dataSource.photoAlbums[i].photoAssets)
+                } else {
+                    self?.fetchPhotos()
+//                    if let asset = self!.dataSource.photoAssets[0].asset {
+//                        self?.selectAlbumButton.setTitle("所有照片∨", for: .normal)
+//                        self?.fetchPhotosWithAlbum(photoAssets: asset)
+//                    }
+                }
+            }
+        })
+//        let actionSheet = LCActionSheet(title: nil, cancelButtonTitle: "取消", clicked: { [weak self](actionSheet, index) in
+//            for i in 0 ..< self!.dataSource.photoAlbums.count {
+//                if index == i+1 {
+//                    print("选择了 \(self!.dataSource.photoAlbums[i].name ?? "")")
+//                    self?.numberOfSelectedPhotoContainer.isHidden = true
+//                    self?.selectAlbumButton.setTitle("\(self!.dataSource.photoAlbums[i].name ?? "")∨", for: .normal)
+//                    self?.fetchPhotosWithAlbum(photoAssets: self!.dataSource.photoAlbums[i].photoAssets)
+//                }
+//            }
+//        }, otherButtonTitleArray: titleArray)
+//        actionSheet.show()
+    }
+
 }
 
 // MARK: - UICollectionViewDataSource
